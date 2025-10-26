@@ -1,0 +1,27 @@
+[project]
+name = "kudi"
+version = "0.0.1"
+description = "Add your description here"
+readme = "README.md"
+license = "MIT"
+keywords = ["money", "money-lib", "money.py", "money-py3"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+authors = [
+    { name = "Gbenga Adeyi", email = "adeyigbenga005@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.9.3,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+    "ruff>=0.14.2",
+]
