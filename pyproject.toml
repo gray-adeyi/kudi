@@ -4,14 +4,14 @@ version = "0.0.1"
 description = "Add your description here"
 readme = "README.md"
 license = "MIT"
+authors = [
+    { name = "Gbenga Adeyi", email = "adeyigbenga005@gmail.com" }
+]
 keywords = ["money", "money-lib", "money.py", "money-py3"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-]
-authors = [
-    { name = "Gbenga Adeyi", email = "adeyigbenga005@gmail.com" }
 ]
 requires-python = ">=3.10"
 dependencies = []
