@@ -145,13 +145,81 @@ class MoneyTestCase(TestCase):
                     f"expected money with amount of 0 to be <= money of amount of {amount} to be {expected}",
                 )
 
-    def test_money_is_zero(self): ...
+    def test_money_is_zero(self):
+        samples = [
+            {"amount": -1, "expected": False},
+            {"amount": 0, "expected": True},
+            {"amount": 1, "expected": False},
+        ]
+        for sample in samples:
+            amount = sample["amount"]
+            expected = sample["expected"]
+            with self.subTest(
+                f"check money is zero evaluates to {expected} when amount is {amount}"
+            ):
+                m = Money(amount, "EUR")
+                self.assertEqual(
+                    m.is_zero,
+                    expected,
+                    f"expected money is zero when amount is {amount} to be {expected}",
+                )
 
-    def test_money_is_negative(self): ...
+    def test_money_is_negative(self):
+        samples = [
+            {"amount": -1, "expected": True},
+            {"amount": 0, "expected": False},
+            {"amount": 1, "expected": False},
+        ]
+        for sample in samples:
+            amount = sample["amount"]
+            expected = sample["expected"]
+            with self.subTest(
+                f"check money is negative evaluates to {expected} when amount is {amount}"
+            ):
+                m = Money(amount, "EUR")
+                self.assertEqual(
+                    m.is_negative,
+                    expected,
+                    f"expected money is negative when amount is {amount} to be {expected}",
+                )
 
-    def test_money_is_positive(self): ...
+    def test_money_is_positive(self):
+        samples = [
+            {"amount": -1, "expected": False},
+            {"amount": 0, "expected": False},
+            {"amount": 1, "expected": True},
+        ]
+        for sample in samples:
+            amount = sample["amount"]
+            expected = sample["expected"]
+            with self.subTest(
+                f"check money is positive evaluates to {expected} when amount is {amount}"
+            ):
+                m = Money(amount, "EUR")
+                self.assertEqual(
+                    m.is_positive,
+                    expected,
+                    f"expected money is positive when amount is {amount} to be {expected}",
+                )
 
-    def test_money_absolute(self): ...
+    def test_money_absolute(self):
+        samples = [
+            {"amount": -1, "expected": 1},
+            {"amount": 0, "expected": 0},
+            {"amount": 1, "expected": 1},
+        ]
+        for sample in samples:
+            amount = sample["amount"]
+            expected = sample["expected"]
+            with self.subTest(
+                f"check absolute money evaluates to {expected} when amount is {amount}"
+            ):
+                m = Money(amount, "EUR")
+                self.assertEqual(
+                    abs(m).amount,
+                    expected,
+                    f"expected absolute of money when amount is {amount} to be {expected}",
+                )
 
     def test_money_negative(self): ...
 
