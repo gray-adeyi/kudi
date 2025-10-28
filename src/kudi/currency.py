@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from kudi.currency_codes import CurrencyCode
 from kudi.currencies_data import CURRENCIES_DATA, CurrencyData
+from kudi.formatter import Formatter
 
 
 @dataclass(frozen=True)
@@ -12,6 +13,16 @@ class Currency:
     template: str
     minor_unit_separator: str
     thousand_delimiter: str
+
+    @property
+    def formatter(self) -> Formatter:
+        return Formatter(
+            self.minor_unit,
+            self.minor_unit_separator,
+            self.thousand_delimiter,
+            self.symbol,
+            self.template,
+        )
 
     def __eq__(self, other):
         return (
