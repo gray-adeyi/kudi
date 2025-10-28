@@ -196,7 +196,8 @@ class Money:
             Calculator.round(self.amount, self.currency.minor_unit), self.currency.code
         )
 
-    def __str__(self): ...
+    def __str__(self) -> str:
+        return self.currency.formatter.format(self.amount)
 
     def __repr__(self):
         return f"Money(amount={self.amount}, code={self.currency.code})"
