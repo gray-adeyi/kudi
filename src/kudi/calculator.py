@@ -17,7 +17,7 @@ class Calculator:
 
     @staticmethod
     def divide(a: Amount, d: int) -> Amount:
-        return a // d
+        return int(a / d)
 
     @staticmethod
     def modulus(a: Amount, d: int) -> Amount:
