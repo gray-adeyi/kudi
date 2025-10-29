@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from kudi import KudiException
 from kudi.currency_codes import CurrencyCode
 from kudi.currencies_data import CURRENCIES_DATA, CurrencyData
 from kudi.formatter import Formatter
@@ -55,6 +56,6 @@ CURRENCIES = {
 
 def _get_currency(code: CurrencyCode) -> Currency:
     currency = CURRENCIES.get(code, None)
-    if not currency:  # TODO: Raise Error
-        ...
+    if not currency:
+        raise KudiException(f"Unknown currency code: {code}")
     return currency
