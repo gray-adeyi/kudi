@@ -1,7 +1,7 @@
 [project]
 name = "kudi"
 version = "0.0.1"
-description = "Add your description here"
+description = "Python implementation of Fowler's Money pattern inspired by go-money in GO"
 readme = "README.md"
 license = "MIT"
 authors = [
