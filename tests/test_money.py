@@ -452,7 +452,25 @@ class MoneyTestCase(TestCase):
                 splits = [money.amount for money in m.split(split)]
                 self.assertListEqual(splits, expected)
 
-    def test_can_allocate_money(self): ...
+    def test_can_allocate_money(self):
+        samples = [
+            {"amount": 100, "ratio": [50, 50], "expected": [50, 50]},
+            {"amount": 100, "ratio": [30, 30, 30], "expected": [34, 33, 33]},
+            {"amount": 200, "ratio": [25, 25, 50], "expected": [50, 50, 100]},
+            {"amount": 5, "ratio": [50, 25, 25], "expected": [3, 1, 1]},
+            {"amount": 0, "ratio": [0, 0, 0, 0], "expected": [0, 0, 0, 0]},
+            {"amount": 0, "ratio": [50, 10], "expected": [0, 0]},
+            {"amount": 10, "ratio": [0, 100], "expected": [0, 10]},
+            {"amount": 10, "ratio": [0, 0], "expected": [0, 0]},
+        ]
+        for sample in samples:
+            amount = sample["amount"]
+            ratio = sample["ratio"]
+            expected = sample["expected"]
+            with self.subTest():
+                m = Money(amount, "EUR")
+                splits = [part.amount for part in m.allocate(*ratio)]
+                self.assertListEqual(splits, expected)
 
     def test_money_str_representation(self):
         samples = [{"amount": 100, "code": "gbp", "expected": "£1.00"}]
