@@ -1,5 +1,7 @@
 from __future__ import annotations
-from decimal import Decimal
+
+import math
+from decimal import Decimal, ROUND_HALF_UP
 
 from kudi.calculator import Calculator
 from kudi.currencies_data import _get_currency_code_from_numeric_code
@@ -55,16 +57,26 @@ class Money:
         while i < n:
             ms.append(Money(a, self.currency.code))
             i += 1
-        r = Calculator.modulus(self.amount, n)
-        l_ = Calculator.absolute(r)
+
+        # Python % operation on negative values always results in a positive value,
+        # so for example, -101 % 4 will result in 3 instead of -1 like in other
+        # languages like GO, JS, Java e.t.c. to account for this, we solve for
+        # it differently when amount is negative
+        if self.is_negative:
+            remainder = self.amount - int(self.amount / n) * n
+        else:
+            remainder = Calculator.modulus(self.amount, n)
+        leftover = Calculator.absolute(remainder)
+
         # Add leftovers to the first parties.
         v = 1
         if self.amount < 0:
             v = -1
         p = 0
-        while l_ != 0:
-            ms[p].amount = Calculator.add(ms[p].amount, v)
-            l_ -= 1
+        while leftover != 0:
+            ms[p] = Money(Calculator.add(ms[p].amount, v), ms[p].currency.code)
+            leftover -= 1
+            p += 1
         return ms
 
     def allocate(self, *rs: int) -> list["Money"]:
@@ -100,7 +112,13 @@ class Money:
             lo -= sub
         return ms
 
-    def as_major_units(self): ...
+    def as_major_units(self):
+        return self.currency.formatter.to_major_units(self.amount)
+
+    def negative(self):
+        """Not to be confused with the unary negative operation"""
+        amount = -Calculator.absolute(self.amount)
+        return Money(amount=amount, code=self.currency.code)
 
     def _normalize_code(self, code: int | str | CurrencyCode) -> CurrencyCode:
         if isinstance(code, CurrencyCode):
@@ -111,6 +129,10 @@ class Money:
                 raise InvalidCurrencyNumericCodeError(
                     f"`{code}` is an invalid numeric currency code, please use 3-digit ISO code e.g.`840` for `USD`"
                 )
+        if not isinstance(code, str):
+            raise TypeError(
+                "`code` must be an instance of `str` | `CurrencyCode` | `int`"
+            )
         if code.isnumeric():
             return _get_currency_code_from_numeric_code(code)
         if len(code) < 3:
@@ -133,9 +155,26 @@ class Money:
             if not amount.isnumeric():
                 raise ValueError(f"`{amount}` is not a valid amount")
         if isinstance(amount, float):
-            ...
+            amount = Decimal(str(amount))
         if isinstance(amount, Decimal):
-            ...
+            amount = amount.quantize(
+                Decimal("0." + "0" * currency.minor_unit),
+                rounding=ROUND_HALF_UP,
+            )
+            decimal_tuple = amount.as_tuple()
+            major_digits = decimal_tuple.digits[0 : decimal_tuple.exponent]
+            minor_digits = decimal_tuple.digits[decimal_tuple.exponent :]
+            major_digits_equivalent = 0
+            minor_digits_equivalent = 0
+            if major_digits:
+                major_digits_equivalent = int(
+                    "".join([str(digit) for digit in major_digits])
+                ) * math.pow(10, currency.minor_unit)
+            if minor_digits:
+                minor_digits_equivalent = int(
+                    "".join([str(digit) for digit in minor_digits])
+                )
+            return major_digits_equivalent + minor_digits_equivalent
         raise ValueError(f"`{amount}` is not a valid amount")
 
     def _assert_is_same_currency_with(self, other: "Money"):
@@ -177,19 +216,24 @@ class Money:
         return Money(Calculator.absolute(self.amount), self.currency.code)
 
     def __neg__(self):
-        return Money(Calculator.negative(self.amount), self.currency.code)
+        return Money(-self.amount, self.currency.code)
 
     def __add__(self, other: "Money") -> Money:
         self._assert_is_same_currency_with(other)
         return Money(Calculator.add(self.amount, other.amount), self.currency.code)
 
-    def __sub__(self, other: "Money"):
+    def __sub__(self, other: Money):
         self._assert_is_same_currency_with(other)
         return Money(Calculator.subtract(self.amount, other.amount), self.currency.code)
 
-    def __mul__(self, by: int) -> Money:
-        # TODO: Check if by is int
-        return Money(Calculator.multiply(self.amount, by), self.currency.code)
+    def __mul__(self, by: int | Money) -> Money:
+        if isinstance(by, int):
+            return Money(Calculator.multiply(self.amount, by), self.currency.code)
+        if isinstance(by, Money):
+            return Money(
+                Calculator.multiply(self.amount, by.amount), self.currency.code
+            )
+        raise TypeError(f"multiplication not supported between Money and {type(by)}")
 
     def __round__(self, n=None):
         return Money(
@@ -200,4 +244,4 @@ class Money:
         return self.currency.formatter.format(self.amount)
 
     def __repr__(self):
-        return f"Money(amount={self.amount}, code={self.currency.code})"
+        return f'Money(amount={self.amount}, code="{self.currency.code}")'
