@@ -1,5 +1,5 @@
 import math
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from kudi.calculator import Calculator
 from kudi.types import Amount
@@ -24,7 +24,7 @@ class Formatter:
         sa = f"{Calculator.absolute(amount)}"
 
         if len(sa) <= self.minor_unit:
-            sa = f"{'0' * self.minor_unit - len(sa) + 1}{sa}"
+            sa = f"{'0' * (self.minor_unit - len(sa) + 1)}{sa}"
 
         if self.thousand_delimiter != "":
             i = len(sa) - self.minor_unit - 3
@@ -48,4 +48,7 @@ class Formatter:
     def to_major_units(self, amount: Amount) -> Decimal:
         if self.minor_unit < 0:
             return Decimal(amount)
-        return Decimal(amount) / Decimal(math.pow(10, self.minor_unit))
+        return (Decimal(amount) / Decimal(math.pow(10, self.minor_unit))).quantize(
+            Decimal("0." + "0" * self.minor_unit),
+            rounding=ROUND_HALF_UP,
+        )
