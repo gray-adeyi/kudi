@@ -108,7 +108,7 @@ class Money:
 
         p = 0
         while lo != 0:
-            ms[p].amount = Calculator.add(ms[p].amount, sub)
+            ms[p] = Money(Calculator.add(ms[p].amount, sub), self.currency.code)
             lo -= sub
         return ms
 
