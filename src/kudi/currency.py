@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from kudi import KudiException
+from kudi.exceptions import KudiException
 from kudi.currency_codes import CurrencyCode
 from kudi.currencies_data import CURRENCIES_DATA, CurrencyData
 from kudi.formatter import Formatter
