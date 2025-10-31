@@ -1,3 +1,4 @@
+from __future__ import annotations
 from kudi.types import Amount
 import math
 

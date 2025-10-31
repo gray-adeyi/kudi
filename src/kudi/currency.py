@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 
 from kudi.exceptions import KudiException
@@ -35,6 +36,9 @@ class Currency:
             and self.thousand_delimiter == other.thousand_delimiter
             and self.thousand_delimiter == other.thousand_delimiter
         )
+
+    def __str__(self):
+        return f"{self.code}"
 
 
 def _get_currency_init_kwargs(code: CurrencyCode, data: CurrencyData) -> dict:

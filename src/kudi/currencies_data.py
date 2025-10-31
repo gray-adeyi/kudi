@@ -1,3 +1,4 @@
+from __future__ import annotations
 from kudi.currency_codes import CurrencyCode
 from typing import TypedDict
 
