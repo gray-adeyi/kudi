@@ -16,15 +16,29 @@ from kudi.exceptions import (
 
 
 class Money:
+    """Money represents monetary value"""
+
     def __init__(
         self, amount: str | int | float | Decimal, code: int | str | CurrencyCode
     ):
+        """Money represents monetary value.
+
+        Args:
+            amount: the value of the money. when an int value is passed, it is assumed to be in
+                the subunit of the currency. i.e. when amount=50 is passed and the currency code is
+                USD, the resulting monetary value is 50 cents. When a float or decimal value is passed,
+                the parts before the decimal point are in the major unit for the currency and the parts
+                after the decimal point are in the minor unit for the currency. The float or decimal
+                value is converted the subunit equivalent.
+            code: the currency code of the monetary value. a 3-digit iso code like 'USD', 'EUR', 'GBP',
+                e.t.c or the 3-digit numeric code like 840, 978. or any variant of the CurrencyCode is valid.
+        """
         self._currency: Currency = _get_currency(self._normalize_code(code))
         self._amount: int = self._normalize_amount(amount, self._currency)
 
     @property
     def amount(self) -> int:
-        """Returns the money value"""
+        """Returns the money value in its subunit"""
         return self._amount
 
     @property
@@ -32,23 +46,38 @@ class Money:
         """Returns the currency used by the money"""
         return self._currency
 
-    def is_same_currency_with(self, other: "Money") -> bool:
+    def is_same_currency_with(self, other: Money) -> bool:
         """Checks if the other money provided is of the same currency with this one."""
         return self.currency == other.currency
 
     @property
     def is_zero(self) -> bool:
+        """Flag to determine if the money value is zero"""
         return self.amount == 0
 
     @property
     def is_positive(self) -> bool:
+        """Flag to determine if the money value is positive"""
         return self.amount > 0
 
     @property
     def is_negative(self) -> bool:
+        """Flag to determine if the money value is negative"""
         return self.amount < 0
 
-    def split(self, n: int) -> list["Money"]:
+    def split(self, n: int) -> list[Money]:
+        """
+        Splits the money
+
+        After division leftover pennies will be distributed round-robin amongst the parties.
+        This means that parties listed first will likely receive more pennies than ones
+        that are listed later.
+
+        Args:
+            n: The number of parts to split the money to
+        Returns:
+            A list of the parts the money has been split.
+        """
         if n <= 0:
             raise ValueError("n must be greater than 0")
         a = Calculator.divide(self.amount, n)
@@ -79,7 +108,16 @@ class Money:
             p += 1
         return ms
 
-    def allocate(self, *rs: int) -> list["Money"]:
+    def allocate(self, *rs: int) -> list[Money]:
+        """Split money by the given ratios without losing pennies.
+
+        Leftover pennies
+
+        Args:
+            rs: the rations you want to allocate the mo
+        Return:
+             A list of the allocations.
+        """
         if len(rs) == 0:
             raise ValueError("no ratios specified")
         # calculate the sum of ratios.
@@ -113,6 +151,7 @@ class Money:
         return ms
 
     def as_major_units(self):
+        """Converts the money value from its subunit value that it's stored in to the major units"""
         return self.currency.formatter.to_major_units(self.amount)
 
     def negative(self):
@@ -185,30 +224,30 @@ class Money:
                 "operations on monies with different currencies is not allowed"
             )
 
-    def _compare(self, other: "Money") -> int:
+    def _compare(self, other: Money) -> int:
         if self.amount > other.amount:
             return 1
         if self.amount < other.amount:
             return -1
         return 0
 
-    def __eq__(self, other: "Money") -> bool:
+    def __eq__(self, other: Money) -> bool:
         self._assert_is_same_currency_with(other)
         return self._compare(other) == 0
 
-    def __gt__(self, other: "Money") -> bool:
+    def __gt__(self, other: Money) -> bool:
         self._assert_is_same_currency_with(other)
         return self._compare(other) == 1
 
-    def __ge__(self, other: "Money") -> bool:
+    def __ge__(self, other: Money) -> bool:
         self._assert_is_same_currency_with(other)
         return self._compare(other) >= 0
 
-    def __lt__(self, other: "Money") -> bool:
+    def __lt__(self, other: Money) -> bool:
         self._assert_is_same_currency_with(other)
         return self._compare(other) == -1
 
-    def __le__(self, other: "Money") -> bool:
+    def __le__(self, other: Money) -> bool:
         self._assert_is_same_currency_with(other)
         return self._compare(other) <= 0
 
@@ -218,7 +257,7 @@ class Money:
     def __neg__(self):
         return Money(-self.amount, self.currency.code)
 
-    def __add__(self, other: "Money") -> Money:
+    def __add__(self, other: Money) -> Money:
         self._assert_is_same_currency_with(other)
         return Money(Calculator.add(self.amount, other.amount), self.currency.code)
 
